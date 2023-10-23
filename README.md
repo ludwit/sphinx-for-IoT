@@ -13,7 +13,7 @@ improve the runtime of the protocol operation. Lastly, my thesis points to the n
 for further research into the reasons for the high network losses observed.*
 
 ## Motivation
-As the IoT becomes more widespread, the security of this technology is
+As the IoT becomes more widespread [[1]](#1), the security of this technology is
 becoming increasingly important. This is particularly true as the data collected
 and processed includes personal information such as health data, location data
 and individual preferences. In addition, IoT devices are often used to monitor 
@@ -161,3 +161,7 @@ The resulting message fow is shown in the Figure below.
      <img src="https://github.com/ludwit/sphinx-for-IoT/blob/main/assets/message-flow.svg" width="800" />
 </center>
 
+## References
+<a id="1">[1]</a>
+McKinsey & Company. What is the Internet of Things?
+https://www.mckinsey.com/featured-insights/mckinsey-explainers/what-is-the-internet-of-things , 2022.
