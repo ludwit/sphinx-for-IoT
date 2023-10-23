@@ -13,15 +13,15 @@ improve the runtime of the protocol operation. Lastly, my thesis points to the n
 for further research into the reasons for the high network losses observed.*
 
 ## Motivation
-As the IoT becomes more widespread [[1]](#1), the security of this technology is
+As the IoT becomes more widespread [[1](#1)], the security of this technology is
 becoming increasingly important. This is particularly true as the data collected
 and processed includes personal information such as health data, location data
 and individual preferences. In addition, IoT devices are often used to monitor 
 and control critical infrastructure and production processes, making them
 valuable targets for cyber espionage and sabotage.<br>
 Unfortunately, the security of IoT solutions has long been a secondary priority 
-leading to adversarial attacks and exploitation. Often, vulnerabilities 
-arise from insecure communication protocls. Even with
+leading to adversarial attacks and exploitation [[2](#2), [3](#3), [4](#4), [5](#5)]. Often, vulnerabilities 
+arise from insecure communication protocls [[6](#6), [7](#7), [8](#8), [9](#9)]. Even with
 secure network protocols, metadata can still be collected revealing the time,
 frequency and scope of communications as well as the entities involved.
 A high level of privacy and security can be achieved by network anonymisation, 
@@ -32,20 +32,20 @@ by making it more difcult for attackers to track or target specifc individuals
 or devices. For example, obscuring the identity and location of IoT devices
 can make it more difcult for adversaries to launch targeted attacks or identify
 vulnerabilities that could be exploited.<br>
-Strong anonymisation comes at the cost of slower network throughput and operational 
+Strong anonymisation comes at the cost of slower network throughput [[10](#10)] and operational 
 overhead for network nodes. The constrained hardware characteristics 
 of the IoT exacerbate this trade-of. Many IoT devices have limited
-processing power, storage capacity and connectivity. These constraints
+processing power, storage capacity and connectivity [[11](#11)]. These constraints
 make it challenging to design and deploy efective anonymisation technologies
 for the IoT.<br>
 Anonymisation technologies have largely been neglected in the IoT. To contribute 
 to the development of anonymisation for IoT my thesis investigated the
 ability of constrained devices used in the IoT to support strong anonymisation 
 techniques. To this end, an adapted design of the Sphinx anonymisation
-protocol is introduced, implemented and evaluated.
+protocol [[12](#12)] is introduced, implemented and evaluated.
 
 ## Constrained Devices Definition
-RFC 7228 provides a classification of constraint devices used in computer
+RFC 7228 [[13](#13)] provides a classification of constraint devices used in computer
 networks. Due to cost and physical limitations, these constrained nodes lack
 some of the features typically found in Internetnodes. The limited power, memory
 and processing resources impose strict upper bounds on state, code space
@@ -56,18 +56,20 @@ on the Internet. Constraints include low achievable bitrate/throughput, high
 packet loss and packet loss variability, penalties for using larger packets, limits
 on reachability over time, and lack of advanced protocol services.
 The constrained device classification is based on the storage capacity for
-volatile and non-volatile memory, as detailed in the following table.
+volatile and non-volatile memory, as detailed in Figure 1.
 
-     +-------------+-----------------------+-------------------------+
-     | Name        | data size (e.g., RAM) | code size (e.g., Flash) |
-     +-------------+-----------------------+-------------------------+
-     | Class 0, C0 | << 10 KiB             | << 100 KiB              |
-     |             |                       |                         |
-     | Class 1, C1 | ~ 10 KiB              | ~ 100 KiB               |
-     |             |                       |                         |
-     | Class 2, C2 | ~ 50 KiB              | ~ 250 KiB               |
-     +-------------+-----------------------+-------------------------+
-     Source: RFC 7228
+     
+|     +-------------+-----------------------+-------------------------+|
+|     | Name        | data size (e.g., RAM) | code size (e.g., Flash) ||
+|     +-------------+-----------------------+-------------------------+|
+|     | Class 0, C0 | << 10 KiB             | << 100 KiB              ||
+|     |             |                       |                         ||
+|     | Class 1, C1 | ~ 10 KiB              | ~ 100 KiB               ||
+|     |             |                       |                         ||
+|     | Class 2, C2 | ~ 50 KiB              | ~ 250 KiB               ||
+|     +-------------+-----------------------+-------------------------+|
+|:--:|
+|     Source: [[13](#13)]|
 
 My thesis focuses on Class 2 constrained devices as they can support a
 wider range of network protocol stacks and still have resources available for
@@ -165,3 +167,62 @@ The resulting message fow is shown in the Figure below.
 <a id="1">[1]</a>
 McKinsey & Company. What is the Internet of Things?
 https://www.mckinsey.com/featured-insights/mckinsey-explainers/what-is-the-internet-of-things , 2022.
+<br><br>
+<a id="2">[2]</a>
+CERT Vulnerability Notes Database. Rsi video technologies videofied security system frontel software uses an insecure custom protocol. https://www.kb.cert.org/vuls/id/792004 , 2015.
+<br><br>
+<a id="3">[3]</a>
+Omar Alrawi, Chaz Lever, Manos Antonakakis, and Fabian Monrose. Sok:
+Security evaluation of home-based iot deployments. In 2019 IEEE Symposium
+on Security and Privacy (SP) , pages 1362-1380, 2019.
+<br><br>
+<a id="4">[4]</a>
+Catalin Cimpanu. Microsoft: Russian state hackers are using IoT devices to
+breach enterprise networks. https://www.zdnet.com/article/microsoft-russian-state-hackers-are-using-iot-devices-to-breach-enterprise-networks, 2019.
+<br><br>
+<a id="5">[5]</a>
+Sarthak Grover and Nick Feamster. The internet of unpatched things.
+https://www.youtube.com/watch?v=-778aD_XVKI , 2016.
+<br><br>
+<a id="6">[6]</a>
+Xianghui Cao, Devu Manikantan Shila, Yu Cheng, Zequ Yang, Yang Zhou,
+and Jiming Chen. Ghost-in-zigbee: Energy depletion attack on zigbee-
+based wireless networks. IEEE Internet of Things Journal , pages 816-829,
+2016.
+<br><br>
+<a id="7">[7]</a>
+Francesca Meneghello, Matteo Calore, Daniel Zucchetto, Michele Polese,
+and Andrea Zanella. Iot: Internet of threats? A survey of practical security
+vulnerabilities in real IoT devices. IEEE Internet of Things Journal , pages
+8182-8201, 2019.
+<br><br>
+<a id="8">[8]</a>
+Olayemi Olawumi, Keijo Haataja, Mikko Asikainen, Niko Vidgren, and
+Pekka Toivanen. Three practical attacks against zigbee security: Attack
+scenario definitions, practical experiments, countermeasures, and lessons
+learned. In 2014 14th International Conference on Hybrid Intelligent Systems, 
+pages 199-206, 2014.
+<br><br>
+<a id="9">[9]</a>
+Eyal Ronen and Adi Shamir. Extended functionality attacks on IoT devices:
+The case of smart lights. In 2016 IEEE European Symposium on Security
+and Privacy, pages 3-12, 2016.
+<br><br>
+<a id="10">[10]</a>
+John Geddes. Privacy and Performance Trade-offs in Anonymous Communication Networks. 
+Retrieved from the University of Minnesota Digital Conservancy, 
+https://hdl.handle.net/11299/185611, 2017.
+<br><br>
+<a id="11">[11]</a>
+IF. Constraints of Internet of Things devices. 
+https://securingiot.projectsbyif.com/constraints-of-internet-of-things-devices,
+2017.
+<br><br>
+<a id="12">[12]</a>
+George Danezis and Ian Goldberg. Sphinx: A compact and provably secure
+mix format. In 2009 30th IEEE Symposium on Security and Privacy , pages
+269-282, 2009.
+<br><br>
+<a id="13">[13]</a>
+Carsten Bormann, Mehmet Ersue, and Ari Keränen. Terminology for Constrained-Node Networks. 
+RFC 7228, 2014.
