@@ -1,7 +1,7 @@
 This is an excerpt from my bachelor thesis, intended to give a quick but detailed insight into my work. 
 
 
-# Implementing and analysing Sphinx on the low-end IoT
+# Implementing and analysing Sphinx on low-end IoT devices
 
 #### Abstract
 *Anonymisation in the low-end IoT is an overlooked topic. Therefore, in my thesis I
@@ -31,13 +31,13 @@ A high level of privacy and security can be achieved by network anonymisation,
 which obscures the identity of the people or devices involved in the
 information exchange. This prevents unauthorised access to personal and sensitive
 information in advance. Anonymisation can also improve overall security
-by making it more difcult for attackers to track or target specifc individuals
+by making it more diffcult for attackers to track or target specifc individuals
 or devices. For example, obscuring the identity and location of IoT devices
-can make it more difcult for adversaries to launch targeted attacks or identify
+can make it more diffcult for adversaries to launch targeted attacks or identify
 vulnerabilities that could be exploited.<br>
 Strong anonymisation comes at the cost of slower network throughput [[10](#10)] and operational 
 overhead for network nodes. The constrained hardware characteristics 
-of the IoT exacerbate this trade-of. Many IoT devices have limited
+of the IoT exacerbate this trade-off. Many IoT devices have limited
 processing power, storage capacity and connectivity [[11](#11)]. These constraints
 make it challenging to design and deploy efective anonymisation technologies
 for the IoT.<br>
@@ -45,7 +45,7 @@ Anonymisation technologies have largely been neglected in the IoT. To contribute
 to the development of anonymisation for IoT my thesis investigated the
 ability of constrained devices used in the IoT to support strong anonymisation 
 techniques. To this end, an adapted design of the Sphinx anonymisation
-protocol [[12](#12)] is introduced, implemented and evaluated.
+protocol [[12](#12)] was introduced, implemented and evaluated.
 
 ## What are Constrained Devices?
 RFC 7228 [[13](#13)] provides a classification of constraint devices used in computer
