@@ -44,7 +44,7 @@ ability of constrained devices used in the IoT to support strong anonymisation
 techniques. To this end, an adapted design of the Sphinx anonymisation
 protocol [[12](#12)] is introduced, implemented and evaluated.
 
-## Constrained Devices Definition
+## What are Constrained Devices?
 RFC 7228 [[13](#13)] provides a classification of constraint devices used in computer
 networks. Due to cost and physical limitations, these constrained nodes lack
 some of the features typically found in Internetnodes. The limited power, memory
@@ -57,26 +57,16 @@ packet loss and packet loss variability, penalties for using larger packets, lim
 on reachability over time, and lack of advanced protocol services.
 The constrained device classification is based on the storage capacity for
 volatile and non-volatile memory, as detailed in Figure 1.
-
-     
-|     +-------------+-----------------------+-------------------------+|
-|     | Name        | data size (e.g., RAM) | code size (e.g., Flash) ||
-|     +-------------+-----------------------+-------------------------+|
-|     | Class 0, C0 | << 10 KiB             | << 100 KiB              ||
-|     |             |                       |                         ||
-|     | Class 1, C1 | ~ 10 KiB              | ~ 100 KiB               ||
-|     |             |                       |                         ||
-|     | Class 2, C2 | ~ 50 KiB              | ~ 250 KiB               ||
-|     +-------------+-----------------------+-------------------------+|
-|:--:|
-|     Source: [[13](#13)]|
-
 My thesis focuses on Class 2 constrained devices as they can support a
 wider range of network protocol stacks and still have resources available for
 applications.
 
-## Overview on Mix Networks
-Mix networks were first introduced by David Chaum in 1981. To achieve
+|<img src="https://github.com/ludwit/sphinx-for-IoT/blob/main/assets/constaind.png" width="600" />|
+|:--:|
+|Fig. 1: Classes of constrained devices (Source: [[13](#13)])|
+
+## What are Mix Networks?
+Mix networks were first introduced by David Chaum in 1981 [[14](#14)]. To achieve
 anonymity, mix networks route messages through a series of mixes, known as the
 path. The sender first cryptographically encapsulates the message, and as the
 message travels along the path, each mix partially decrypts it. Some anonymity
@@ -88,7 +78,7 @@ ference is that mix nodes add a random delay to messages or send messages
 in batches to make traffic analysis more difficult. However, this results in high
 latencies, so mix networks are not used for applications that require responsive-
 ness, such as web browsing. A typical application of mix networks have been
-anonymous email relays such as Mixminion.
+anonymous email relays such as Mixminion [[15](#15)].
 Mix networks have been mostly driven out of real-world applications by the
 success of Tor, so little work has been done to integrate constrained devices into them.
 However, the downside of high latencies in mix networks comes at a lower
@@ -96,10 +86,10 @@ cost in low-end IoT, where many applications do not require responsiveness and
 could benefit signifcantly from anonymity. One example would be collecting
 and transmitting environmental data using network-capable sensors.
 
-## Sphinx Features
+## The Sphinx Protocol
 
 Sphinx is a cryptographic message format proposed by George Danezis and Ian
-Goldberg in 2009. It was designed to enable anonymous data exchange
+Goldberg in 2009 [[12](#12)]. It was designed to enable anonymous data exchange
 over a mix network. Compared to other cryptographic message formats, Sphinx
 has a compact header size and very high security, while remaining fexible and
 versatile. Sphinx has all the necessary characteristics to meet the requirements
@@ -120,7 +110,8 @@ nodes cannot distinguish between reply messages and normal forward
 messages. As a result, the anonymity sets of both types of traffic are
 combined, resulting in improved security for both.
 
-## Desing Goals
+## Desing
+### Goals
 The purpose of this design and the following implementation is to evaluate whether
 the limited resources of constrained devices are sufcient to support Sphinx.
 In this sense, the original Sphinx specifcation and network design have been
@@ -133,7 +124,7 @@ maintained.
 - **Storage Efciency**: Message size and network operation memory overhead
 should be kept to a minimum.
 
-## Desing Overview
+### Overview
 A major change in this design from the original Sphinx specifcation is that
 messages are not forwarded beyond the boundaries of the Sphinx network (i.e.
 the wider Internet). This means that the recipient of a Sphinx message must
@@ -157,11 +148,65 @@ recipient. There, the payload is extracted, and the acknowledgement is sent
 as a reply. Upon receipt of the reply, the sender acknowledges the message.
 Messages that have not been acknowledged within a certain period of time are
 retransmitted. After several failed retransmission attempts, a message is discarded. 
-The resulting message fow is shown in the Figure below.
+The resulting message fow is shown in the Figure 2.
 
-<center>
-     <img src="https://github.com/ludwit/sphinx-for-IoT/blob/main/assets/message-flow.svg" width="800" />
-</center>
+|<img src="https://github.com/ludwit/sphinx-for-IoT/blob/main/assets/message-flow.svg" width="800" />|
+|:--:|
+|Fig. 2: Network message flow|
+
+## Implementation
+
+### Operating System
+The Sphinx implementation has been developed for the RIOT operating system [[16](#16)]. 
+RIOT is a lightweight operating system designed for constrained devices
+used in the IoT. It runs on processors from 8-bit to 32-bit and comes with a
+native port for Linux and MacOS. RIOT is open-source software and supports
+the C, C++ and Rust programming languages for applications. RIOT is modular 
+and hardware-abstract. This allows RIOT to support many features while
+keeping applications memory efficient and easy to develop. RIOT's capabilities
+include multiple network stacks, multithreading, real-time capabilities, and it is
+party POSIX compliant.
+
+### Crypto Library
+The implementation requires a cryptographic library that supports elliptic cryptography 
+and symmetric cryptographic functions such as a pseudorandom number 
+generator and authentication. The ARM PSA Crypto API [[17](#17)] would be a
+good fit, but was under development for RIOT at the time of implementation
+[[18](#18)]. Other libraries such as Relic [[19](#19)] and wolfCRYPT [[20](#20)] were discarded due
+to their complexity.<br>
+This implementation uses the TweetNaCl crypto library [[21](#21)]. TweetNaCl
+provides all the necessary functions for this implementation without any parameterisation. 
+The advantages are the high level of security and the compactness of
+the source code, which fits into 100 tweets, hence the name. Another advantage
+is that TweetNaCl is already included in RIOT as a package by default.
+Another possible crypto library would have been TinyCrypt [[22](#22)], as it also
+supports the necessary functions and focuses on a small memory footprint.
+
+### Integration
+Sphinx runs on RIOT as a single thread with a priority just above the main
+functions thread. To use Sphinx, a simple command line integration allows one
+to start and stop the Sphinx thread as well as to initiate sending a message.
+Sphinx also assumes the presence of a public key infrastructure (PKI) to publish the public keys and
+addresses of available network nodes. In this implementation, instead of a PKI,
+the public keys, private keys and addresses of all nodes are stored in a static
+array. The PKI is accessed through a set of global functions tailored to the
+needs of the Sphinx implementation.<br>
+Sphinx is implemented on top of RIOT's Generic (GNRC) network stack [[23](#23)].
+At the link layer, the low-rate wireless personal area network standard IEEE
+802.15.4 [[24](#24)] is used as the basis for communication between Sphinx entities. To
+enable IPv6 over IEEE 802.15.4, the adaptation layer protocol 6LoWPAN [[25](#25)] 
+is used. Then, at the transport layer, UDP is used on top of IPv6. From
+an OSI [[26](#26)] perspective, Sphinx can be seen as a shim layer between the transport
+and application layer. Note that this implementation does not interoperate with
+any application protocol.
+Figure 3 shows the active threads on an example board running the RIOT
+sphinx application. The network stack becomes visible here, as each layer is
+represented by its own thread. The thread implementing IEEE 802.15.4 is
+named "at86rf2xx" after the transceiver used in the board.
+
+|<img src="https://github.com/ludwit/sphinx-for-IoT/blob/main/assets/message-flow.svg" width="800" />|
+|:--:|
+|Fig. 3: Threads running on a Sphinx application in RIOT|
 
 ## References
 <a id="1">[1]</a>
@@ -226,3 +271,55 @@ mix format. In 2009 30th IEEE Symposium on Security and Privacy , pages
 <a id="13">[13]</a>
 Carsten Bormann, Mehmet Ersue, and Ari Keränen. Terminology for Constrained-Node Networks. 
 RFC 7228, 2014.
+<br><br>
+<a id="14">[14]</a>
+David L. Chaum. Untraceable electronic mail, return addresses, and digital
+pseudonyms. Commun. ACM , page 84-90, 1981.
+<br><br>
+<a id="15">[15]</a>
+G. Danezis, R. Dingledine, and N. Mathewson. Mixminion: Design of a
+Type III Anonymous Remailer Protocol. In 2003 Symposium on Security and
+Privacy, pages 2-15, 2003.
+<br><br>
+<a id="16">[16]</a>
+Emmanuel Baccelli, Cenk Gündoğan, Oliver Hahm, Peter Kietzmann, Martine S. Lenders, 
+Hauke Petersen, Kaspar Schleiser, Thomas C. Schmidt,
+and Matthias Wählisch. Riot: An open source operating system for low-end 
+embedded devices in the IoT. IEEE Internet of Things Journal , pages
+4428-4440, 2018.
+<br><br>
+<a id="17">[17]</a>
+Arm Limited. https://armmbed.github.io/mbed-crypto/html/index.html, 2022.
+<br><br>
+<a id="18">[18]</a>
+Lena Boeckmann. Psa crypto api implementation. https://github.com/RIOT-OS/RIOT/pull/18547, 2022.
+<br><br>
+<a id="19">[19]</a>
+Diego F. Aranha. Relic. https://github.com/relic-toolkit/relic
+<br><br>
+<a id="20">[20]</a>
+wolfSSL Inc. wolfcrypt embedded crypto engine. https://www.wolfssl.com/products/wolfcrypt
+<br><br>
+<a id="21">[21]</a>
+Daniel J. Bernstein, Bernard van Gastel, Wesley Janssen, Tanja Lange,
+Peter Schwabe, and Sjaak Smetsers. Tweetnacl: A crypto library in 100
+tweets. In Progress in Cryptology - LATINCRYPT 2014 , pages 64-83, 2015.
+<br><br>
+<a id="22">[22]</a>
+Intel Corporation. Tinycrypt cryptographic library. https://github.com/intel/tinycrypt , 2017.
+<br><br>
+<a id="23">[23]</a>
+M. Lenders. Analysis and comparison of embedded network stacks. http://doc.riot-os.org/mlenders_msc.pdf, 2016.
+<br><br>
+<a id="24">[24]</a>
+IEEE standard for low-rate wireless networks. IEEE Std 802.15.4-2020
+vision of IEEE Std 802.15.4-2015), pages 1-800, 2020.
+<br><br>
+<a id="25">[25]</a>
+Gabriel Montenegro, Jonathan Hui, David Culler, and Nandakishore
+Kushalnagar. Transmission of IPv6 Packets over IEEE 802.15.4 Networks.
+RFC 4944, 2007.
+<br><br>
+<a id="26">[26]</a>
+Information technology Open Systems Interconnection Basic Reference Model: 
+The Basic Model. https://www.iso.org/standard/20269.html , 1994.
