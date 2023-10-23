@@ -1,7 +1,7 @@
 This is an excerpt from my bachelor thesis, intended to give a quick but detailed insight into my work. 
 
 
-# Sphinx on the low-end IoT
+# Implementing and analysing Sphinx on the low-end IoT
 
 #### Abstract
 *Anonymisation in the low-end IoT is an overlooked topic. Therefore, in my thesis I
