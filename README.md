@@ -204,9 +204,45 @@ sphinx application. The network stack becomes visible here, as each layer is
 represented by its own thread. The thread implementing IEEE 802.15.4 is
 named "at86rf2xx" after the transceiver used in the board.
 
-|<img src="https://github.com/ludwit/sphinx-for-IoT/blob/main/assets/message-flow.svg" width="800" />|
+|<img src="https://github.com/ludwit/sphinx-for-IoT/blob/main/assets/ps.png" width="900" />|
 |:--:|
 |Fig. 3: Threads running on a Sphinx application in RIOT|
+
+## Evaluation
+The experiments were conducted in the FIT IoT-LAB [[27](#27)]. The IoT-LAB provides 
+a very large test environment for constrained devices used in the IoT. It
+supports 18 different boards and consists of over 1500 nodes spread across six
+sites.
+
+### Hardware
+All examined boards support an IEEE 802.15.4 radio
+interface for low-power, short-range wireless communication. The boards are
+further specifed by their embedded processor, volatile memory capacity and
+non-volatile memory capacity:
+- **SAMR21 Xplained Pro**
+    - ARM Cortex-M0+
+    - 32 kB RAM
+    - 256 kB ROM
+- **IoT-LAB M3**
+    - ARM Cortex M3
+    - 64 kB RAM
+    - 256 kB ROM
+- **Nordic nRF52840DK**
+    - ARM Cortex M4
+    - 256 kB RAM
+    - 1000 kB ROM
+
+### Runtime
+In order to quantify the performance of Sphinx, a runtime measurement was
+made considering the creation and processing of a Sphinx message. To do this, a
+timestamp of the current system time was taken at the beginning and end of the
+functions in question. Then the difference was taken and printed to the console.
+Other parts of the program, such as networking, were not included in the runtime
+measurement because their impact on the overall runtime was negligible. The
+path lengths considered range from six to ten. Figure 4 shows the time taken to create
+a message for a given path length.
+
+
 
 ## References
 <a id="1">[1]</a>
@@ -323,3 +359,10 @@ RFC 4944, 2007.
 <a id="26">[26]</a>
 Information technology Open Systems Interconnection Basic Reference Model: 
 The Basic Model. https://www.iso.org/standard/20269.html , 1994.
+<br><br>
+<a id="27">[27]</a>
+Cedric Adjih, Emmanuel Baccelli, Eric Fleury, Gaetan Harter, Nathalie
+Mitton, Thomas Noel, Roger Pissard-Gibollet, Frederic Saint-Marcel, Guillaume 
+Schreiner, Julien Vandaele, and Thomas Watteyne. Fit iot-lab: A
+large scale open experimental IoT testbed. In 2015 IEEE 2nd World Forum
+on Internet of Things (WF-IoT), pages 459-464, 2015.
