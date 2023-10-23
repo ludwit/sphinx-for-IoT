@@ -1,3 +1,7 @@
+**Foreword**
+This is an excerpt from my bachelor thesis, intended to give a quick but detailed insight into my work.
+
+
 # Sphinx on the low-end IoT
 
 #### Abstract
