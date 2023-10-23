@@ -2,14 +2,14 @@
 
 #### Abstract
 *Anonymisation in the low-end IoT is an overlooked topic. Therefore, in my thesis I
-presents a design of the Sphinx protocol used in anonymous mix networks for con
-strained devices. Following this design, an implementation of Sphinx on the embedded
-operating system RIOT is evaluated. The evaluation considers memory usage, runtime
+presented a design of the Sphinx protocol used in anonymous mix networks for constrained 
+devices. Following this design, an implementation of Sphinx on the embedded
+operating system RIOT was evaluated. The evaluation considers memory usage, runtime
 analysis and network performance.
 The results show that end-to-end anonymisation
 is possible for the low-end IoT but at a high cost in terms of network throughput.
 In particular, the importance of hardware-accelerated cryptography is highlighted to
-improve the runtime of the protocol operation. Lastly, my thesis points to the need
+improve the runtime of the protocol operation. Lastly, my thesis pointed to the need
 for further research into the reasons for the high network losses observed.*
 
 ## Motivation
