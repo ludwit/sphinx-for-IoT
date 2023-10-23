@@ -242,7 +242,152 @@ measurement because their impact on the overall runtime was negligible. The
 path lengths considered range from six to ten. Figure 4 shows the time taken to create
 a message for a given path length.
 
+|<img src="https://raw.githubusercontent.com/ludwit/sphinx-for-IoT/main/assets/create_samr.svg" width="700" />|
+|:--:|
+|<img src="https://raw.githubusercontent.com/ludwit/sphinx-for-IoT/main/assets/create_iot-m3_nordic.svg" width="700" /><tr></tr>|
+|Fig. 4: Runtime measurement of message creation|
 
+The runtime measurements for creating a message show that Sphinx has
+a huge processing overhead. In particular, the SAMR21 Xplained Pro board
+equipped with the very low-end ARM Cortex-M0+ suffers from runtimes in the
+order of minutes, making this Sphinx implementation almost unusable for this
+board. The IoT-LAB M3 and Nordic nRF52840DK are about four times faster,
+but still require processing times in the low tens of seconds.<br>
+The source of these very long runtimes are the computationally expensive
+asymmetric cryptographic operations, i.e. the scalar multiplications. Most of
+the scalar multiplications required to create a Sphinx message result from the
+blinding strategy used by Sphinx to recycle the public key. To compute a shared
+secret with a node in the message path, the sender must perform an additional
+scalar multiplication for each previous node in the message path.
+This is where the trade-off between compact header size and computational complexity
+becomes apparent. On the one hand, only one public key is needed for the
+Sphinx key exchange instead of one for each hop. On the other hand, the runtime 
+increases exponentially with increasing path length.<br><br>
+Figure 5 shows the runtime for the different variations of processing a message. 
+For each value, the worst case observed has been taken. It should be
+noted that the observed variations rarely exceeded 100 ms.
+
+|<a id="fig5"><img src="https://raw.githubusercontent.com/ludwit/sphinx-for-IoT/main/assets/process.svg" width="700" /></a>|
+|:--:|
+|Fig. 5: Runtime measurement of message processing|
+
+The processing of a message, unlike the creation of a message, is constant
+in terms of path length. The results of the SAMR21 Xplained Pro board are
+again a multiple of the results of the other boards. Still, the time required for
+forwarding as well as receiving and replying to a message is about one second for
+the IoT-LAB M3 and Nordic nRF52840DK boards. This is a long time considering 
+that a message passes through at least six nodes before it is acknowledged.
+Not only does this result in long round trip times, but it also reduces the number 
+of messages a node can forward and receive, thus reducing overall network
+reliability and throughput.
+Again, the scalar multiplications dominate the required runtime. Forwarding, 
+as well as receiving and replying to a message, requires one scalar multiplication 
+to compute the shared secret from the public key and another to blind
+the public key. Acknowledging a message requires only one scalar multiplication 
+to calculate the shared secret. Accordingly, the runtime for acknowledging
+a message is quit accurely about half the time required to forward a message or
+to receive and reply to a message.<br><br>
+The overhead caused by the Sphinx protocol's key exchange strategy for
+processing a message is not as critical as it is for creating a message. Only the
+public key blinding required for forwarding as well as receiving and replying to
+a message adds to this overhead. One way to reduce asymmetric cryptography's
+runtime overhead is to use hardware acceleration. It has been shown that the
+use of peripheral crypto-acceleration, in an environment of constrained devices,
+can reduce the time required for a scalar multiplication to about 20 ms [[28](#28)].
+Assuming this huge runtime improvement, the Sphinx performance bottleneck
+would be widened by an order of magnitude.
+
+### Network Tests
+The network tests were carried out using the 64 alive IoT-LAB M3 boards at the
+FIT IoT-LAB site in Paris. There, all 64 boards are distributed in a room with
+dimensions of about 7x4x2 m. These dimensions are well within the range of
+the low-rate wireless networking standard IEEE 802.15.4, allowing a full mesh
+network topology where all nodes have a direct physical connection to each
+other. Figure 6 shows the physical arrangement of the 64 active IoT-LAB M3
+boards at the Paris site.
+
+|<img src="https://raw.githubusercontent.com/ludwit/sphinx-for-IoT/main/assets/paris.png" width="700" />|
+|:--:|
+|Fig. 6: Physical board layout|
+
+The purpose of the network tests is to evaluate the throughput of the Sphinx
+network and the message loss rate. All network tests were performed with a
+fixed path length for the toward and backward direction of three, resulting in
+a total path length of six. This decision was made based on the results of the
+runtime measurements in order to minimise the time needed to create a Sphinx
+message, with the trade-off of less anonymity.
+<br><br>
+For the first experiment, each node acts as a sender, forwarder and receiver
+of Sphinx messages. The experiment was repeated several times
+with an increasing number of nodes. For each experiment, messages were sent
+for one hour, followed by a cool-down period of 16 minutes so that each message
+could be retransmitted until is was acknowledged or discarded.
+For comparison, another set of experiments was run where simple UDP packets 
+were sent instead of Sphinx messages. Of course, Sphinx messages are also
+sent using UDP. Any further mention of UDP refers to a pure use of UDP without 
+the Sphinx protocol. Apart from the omitted Sphinx protocol operation,
+the only difference to the Sphinx mesh topology experiment is that the packets 
+were sent directly to a receiver, who responded directly to the sender with
+an acknowledgment. Packet size, message timeouts, maximum retransmissions
+and experiment runtime were kept the same. Figure 7 shows the results of the
+Sphinx mesh experiment and the reference experiment using UDP.
+
+|<img src="https://raw.githubusercontent.com/ludwit/sphinx-for-IoT/main/assets/mesh-sphinx.svg" width="950" />|
+|:--:|
+|<img src="https://raw.githubusercontent.com/ludwit/sphinx-for-IoT/main/assets/mesh-udp.svg" width="950" /><tr></tr>|
+|Fig. 7: Mesh network test results|
+
+The results of the mesh network test show that the Sphinx overlay network suffers 
+from increasing message loss as the network size increases. The high
+ratio of dropped messages makes this setup impractical for real-world use cases.
+Even the drop rate for small network sizes significantly impacts the network
+throughput.<br>
+Comparing the results of using Sphinx with those of using UDP, the cost of
+Sphinx in terms of network performance becomes clear. For networks of up to 30
+nodes, the UDP packet loss rate is very low, given the constrained environment.
+Even for larger network sizes, the message loss rate remains below the message
+loss rate of the smallest Sphinx network test.<br>
+The causes of message loss in the Sphinx network can be categorised as
+physical layer transmission errors and the exhaustion of the resources allocated
+to networking in the nodes. Message loss caused by the physical layer cannot
+be solved by a Sphinx implementation and will not be investigated further. It
+should be noted that the above comparison between Sphinx and UDP does not
+quantify the impact of physical layer transmission errors. A Sphinx message
+must be transmitted six times, whereas a UDP packet only needs to be transmitted 
+two times before it is acknowledged.<br>
+However, adapting the implementation and deployment can mitigate the impact 
+on network resources. The long runtimes of Sphinx, especially the runtime
+for creating a message, cause a huge delay in message processing. While a node
+is busy creating a message, all received messages have to be buffered, eventually
+using up the allocated resources.<br>
+<br>
+To investigate the effect of resource exhaustion, a new experiment was run
+where the nodes are divided into groups. One group consists of message
+senders, called clients, and the other group consists of nodes that forward and
+receive messages, called servers in a ratio of 2:5 with 18 clients and 45 servers. 
+In this way, the long time it takes to create
+a Sphinx message does not affect the forwarding and receiving of messages. <br>
+Another experiment was carried out where the nodes responsible for forwarding 
+messages were separated as mixes. The resulting ration of clients, mixes and
+servers was 2:4:1 with 18 client nodes sending
+messages, 36 mix nodes forwarding messages and 9 server nodes receiving messages.
+Figure 8 visualises the results of the experiments.
+
+
+|<img src="https://raw.githubusercontent.com/ludwit/sphinx-for-IoT/main/assets/client-mix-server.svg" width="700" />|
+|:--:|
+|Fig. 8: Comparison of different network topology tests|
+
+The results of the two experiments show that further separation of node types
+leads to a reduction in message loss of about one-third. The exact reason why
+the network throughput improves with the client-mix-server topology cannot
+be deduced from this experiment alone. It was [shown](#fig5) that the
+runtime required to forward a message is almost the same as that required to
+receive and reply to a message. Therefore, the increased throughput cannot
+be explained by a superior processing load distribution. Also, as explained
+above, with a ratio of mix nodes to server nodes of 4:1, on average, the number
+of messages processed per node should be about the same for mix nodes and
+server nodes. This phenomenon deserves further investigation.
 
 ## References
 <a id="1">[1]</a>
@@ -366,3 +511,9 @@ Mitton, Thomas Noel, Roger Pissard-Gibollet, Frederic Saint-Marcel, Guillaume
 Schreiner, Julien Vandaele, and Thomas Watteyne. Fit iot-lab: A
 large scale open experimental IoT testbed. In 2015 IEEE 2nd World Forum
 on Internet of Things (WF-IoT), pages 459-464, 2015.
+<br><br>
+<a id="28">[28]</a>
+Peter Kietzmann, Lena Boeckmann, Leandro Lanzieri, Thomas C. Schmidt,
+and Matthias Wählisch. A performance study of crypto-hardware in the
+low-end iot. In Proceedings of the 2021 International Conference on Embedded 
+Wireless Systems and Networks, page 79-90, 2021.
