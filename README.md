@@ -384,10 +384,48 @@ the network throughput improves with the client-mix-server topology cannot
 be deduced from this experiment alone. It was [shown](#fig5) that the
 runtime required to forward a message is almost the same as that required to
 receive and reply to a message. Therefore, the increased throughput cannot
-be explained by a superior processing load distribution. Also, as explained
-above, with a ratio of mix nodes to server nodes of 4:1, on average, the number
+be explained by a superior processing load distribution. Also with a ratio 
+of mix nodes to server nodes of 4:1, on average, the number
 of messages processed per node should be about the same for mix nodes and
 server nodes. This phenomenon deserves further investigation.
+
+### Improvements of Design and Implementation
+Throughout the conduct and evaluation of the experiments and the writing of
+my thesis, possible improvements to the design and implementation of Shinx
+for constrained devices have emerged. These are outlined below:
+- **Message duplication detection:** When a message is received, the receiver sends an acknowledgment. Some of the acknowledgments are lost on their way back to the sender. If these messages are retransmitted and reach the receiver, message duplication occurs.
+- **Removing the last address in the final subheaders:** In the current design, the last subheader processed by the receiver also contains the receiver's address. This is to indicate to the receiver that it is the end node. Alternatively, the address could be exchanged with a message ID.
+- **Reduce the number of scalar multiplications to calculate shared secrets:** This would reduce the number of scalar multiplications required to calculate the shared secrets by the length of the path. As these are the most expensive operations, this would result in a noticeable decrease in the runtime to create a message.
+- **Runtime-optimized crypto library:** The TweetNaCl crypto library used in the implementation is not runtime optimized. At least for the expensive asymmetric cryptography, a runtime-optimized crypto library could improve performance significantly. A good option would be micro-ecc [[29](#29)], which is included in TinyCrypt.
+- **Replies with payload:** In this design, Sphinx's reply mechanism was deliberately used only to acknowledge messages, but it can also be used to transmit data back to the sender.
+
+## Conclusion and Outlook
+My thesis has shown that the use of Sphinx pushes the resources of constrained
+devices to their limits. A major limiting factor is the runtime complexity of the
+Sphinx key exchange strategy combined with the computationally expensive
+operations for asymmetric cryptography. This is where the greatest potential
+for optimization lies in accelerating operations with crypto hardware.
+It was also shown that the Sphinx network's throughput suffers from high
+message loss rates. The reasons for the frequent loss of messages could not be
+pinpointed and should be the subject of further investigation.
+Despite this, Sphinx proved to have a small enough memory footprint, both
+in ROM and RAM, to meet the requirements of the constrained devices in the
+IoT. A network topology was also explored that resulted in a tolerable message
+loss ratio for use cases that require extremely low bandwidth, do not demand a
+short round trip time, and have an abundance of network nodes.
+Further work with Sphinx in the constrained device environment should include 
+optimizations and adjustments to the design to improve the ratio of payload 
+to protocol overhead in a message and to reduce the amount of expensive
+cryptographic operations. At the implementation level, the runtime of cryptographic 
+operations should be improved through the integration of optimized
+cryptographic libraries and cryptographic hardware. More extensive network
+testing should also be conducted to investigate the reasons for the high message
+loss rate. Similarly, network testing beyond the range of wireless networks, including 
+border routers, should be performed to evaluate the usability of Sphinx
+for real-world scenarios.
+Overall, Sphinx can provide highly secure anonymization for the low-end
+IoT, but it remains to be seen whether further improvements to Sphinx will
+make it deployable in real-world scenarios.
 
 ## References
 <a id="1">[1]</a>
@@ -517,3 +555,6 @@ Peter Kietzmann, Lena Boeckmann, Leandro Lanzieri, Thomas C. Schmidt,
 and Matthias Wählisch. A performance study of crypto-hardware in the
 low-end iot. In Proceedings of the 2021 International Conference on Embedded 
 Wireless Systems and Networks, page 79-90, 2021.
+<br><br>
+<a id="29">[29]</a>
+Ken MacKay. micro-ecc. http://kmackay.ca/micro-ecc
